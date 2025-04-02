@@ -11,7 +11,6 @@ TEST_DIR = "/Users/juanpablocabreraquiroga/Documents/Desarrollo-de-aplicaciones-
 def explore_dataset(base_dir):
     print(f"\nExplorando directorio: {base_dir}")
     
-    # Obtener subdirectorios (clases)
     classes = [d for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d))]
     print(f"Clases encontradas: {classes}")
     
@@ -53,13 +52,13 @@ def explore_dataset(base_dir):
 
 print("=== EXPLORACIÓN DEL CONJUNTO DE DATOS ===")
 
-# Explorar datos de entrenamiento
+# Datos de entrenamiento
 train_stats = explore_dataset(TRAIN_DIR)
 
-# Explorar datos de prueba
+# Datos de prueba
 test_stats = explore_dataset(TEST_DIR)
 
-# Mostrar distribución de clases
+# Distribución de clases
 if train_stats and test_stats:
     
     # Crear gráfico de barras comparativo
