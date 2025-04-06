@@ -1,15 +1,20 @@
 import tensorflow as tf
-from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing.image import ImageDataGenerator  # type: ignore
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image, ImageFile
 
-# Definición de rutas a los conjuntos de datos
+# IMPORTANTE: Configurar PIL para manejar imágenes truncadas (error que me daba al momento de correr el enrenamiento del modelo)
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+# Aumentar el límite de píxeles para evitar DecompressionBombWarning
+Image.MAX_IMAGE_PIXELS = None
+
 TRAIN_DIR = "/Users/juanpablocabreraquiroga/Documents/Desarrollo-de-aplicaciones-avanzadas-de-ciencias-computacionales/train"
 TEST_DIR = "/Users/juanpablocabreraquiroga/Documents/Desarrollo-de-aplicaciones-avanzadas-de-ciencias-computacionales/test"
 
 # Hiperparámetros de preprocesamiento
 IMG_SIZE = 224 
-BATCH_SIZE = 32
+BATCH_SIZE = 64 # Esto el primer run fue con 64, lo estoy pensando en ajustar en 32 y dejarlo corriendo.
 
 # Configuración del pipeline de preprocesamiento con técnicas de data augmentation
 train_datagen = ImageDataGenerator(
@@ -70,23 +75,42 @@ print(f"- Pasos por época (val): {len(validation_generator)} iteraciones")
 print(f"- Test: {test_generator.samples} instancias")
 print(f"- Pasos para evaluación: {len(test_generator)} iteraciones")
 
+# Función para capturar un lote de manera segura, con manejo de errores, esto me toco hacerlo porque el generador de datos a veces me daba error al momento de correr el modelo.
+def get_safe_batch(generator, max_attempts=3):
+    for attempt in range(max_attempts):
+        try:
+            return next(generator)
+        except Exception as e:
+            print(f"Error al obtener batch (intento {attempt+1}/{max_attempts}): {e}")
+            if attempt == max_attempts - 1:
+                print("No se pudo obtener un batch válido después de varios intentos.")
+                # Devolver arrays vacíos como fallback
+                return np.zeros((0, IMG_SIZE, IMG_SIZE, 3)), np.zeros((0,))
+    
 # Inspección de la estructura de datos resultante
-batch_x, batch_y = next(train_generator)
-print(f"\nEstructura de tensor de entrada: {batch_x.shape}")
-print(f"Estructura de tensor de etiquetas: {batch_y.shape}")
-print(f"Rango de valores tras normalización: [{batch_x.min()}, {batch_x.max()}]")
+try:
+    batch_x, batch_y = get_safe_batch(train_generator)
+    
+    if len(batch_x) > 0:
+        print(f"\nEstructura de tensor de entrada: {batch_x.shape}")
+        print(f"Estructura de tensor de etiquetas: {batch_y.shape}")
+        print(f"Rango de valores tras normalización: [{batch_x.min()}, {batch_x.max()}]")
 
-# Visualización de ejemplos de data augmentation
-plt.figure(figsize=(12, 8))
-for i in range(min(9, batch_x.shape[0])):
-    plt.subplot(3, 3, i+1)
-    plt.imshow(batch_x[i])
-    plt.title(f"Clase: {'Real' if batch_y[i] > 0.5 else 'Fake'}")
-    plt.axis('off')
+        # Visualización de ejemplos de data augmentation
+        plt.figure(figsize=(12, 8))
+        for i in range(min(9, batch_x.shape[0])):
+            plt.subplot(3, 3, i+1)
+            plt.imshow(batch_x[i])
+            plt.title(f"Clase: {'Real' if batch_y[i] > 0.5 else 'Fake'}")
+            plt.axis('off')
 
-plt.tight_layout()
-plt.suptitle("Ejemplos de imágenes preprocesadas con data augmentation", y=0.98)
-plt.show()
+        plt.tight_layout()
+        plt.suptitle("Ejemplos de imágenes preprocesadas con data augmentation", y=0.98)
+        plt.show()
+    else:
+        print("\nNo se pudieron obtener ejemplos para visualización.")
+except Exception as e:
+    print(f"\nError al visualizar ejemplos: {e}")
 
 print("\nPipeline de preprocesamiento configurado exitosamente.")
 print("Nota: Los tensores serán generados dinámicamente durante entrenamiento para optimizar memoria.")
