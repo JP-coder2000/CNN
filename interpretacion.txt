@@ -1,0 +1,9 @@
+Viendo las gráficas de mi modelo, puedo notar que el entrenamiento duró 9 épocas y mostró un comportamiento interesante.
+En cuanto a la precisión (accuracy), mi modelo empezó alrededor del 60% y fue mejorando constantemente en el entrenamiento hasta llegar casi al 69%. La validación tuvo un comportamiento más irregular, alcanzando su mejor momento en la época 6 con aproximadamente 67.5%, pero luego comenzó a bajar un poco.
+En la gráfica de pérdida (loss), puedo ver que la pérdida de entrenamiento bajó de manera constante, lo que es buena señal. Sin embargo, la pérdida de validación empezó a comportarse de forma errática después de la época 4, incluso subiendo bastante en la época 7, lo que no es ideal.
+Lo que estoy viendo aquí es un caso típico de overfitting que empezó alrededor de la época 6. Mi modelo comenzó a "memorizar" los datos de entrenamiento en lugar de aprender patrones que pudiera aplicar a datos nuevos. Esto explica por qué el entrenamiento siguió mejorando mientras que la validación empezó a fluctuar y eventualmente empeoró.
+Para mi próxima versión del modelo, definitivamente necesito:
+
+Aumentar el dropout para reducir el overfitting
+Mejorar el data augmentation para que el modelo vea más variaciones de las imágenes
+Implementar early stopping para detener el entrenamiento antes de que comience el overfitting
