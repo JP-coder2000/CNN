@@ -1,19 +1,15 @@
 import tensorflow as tf
-from tensorflow.keras.applications import ResNet50
-from keras import layers, models, optimizers
+from tensorflow.keras.applications import ResNet50 #type: ignore
+from tensorflow.keras import layers, models, optimizers #type: ignore
 import os
+import json
 
+# Importar configuración
+from config import (
+    IMG_SIZE, LEARNING_RATE, DROPOUT_RATE, 
+    MODEL_PATH, MODEL_DIR
+)
 
-# Hiperparámetros de la arquitectura mejorada
-IMG_SIZE = 224     # Dimensión espacial para entrada de la red
-LEARNING_RATE = 3e-4  # Aumentado para convergencia más rápida
-DROPOUT_RATE = 0.5  # Aumentado para reducir overfitting
-
-# Directorio para almacenar modelos
-MODEL_DIR = "models"
-os.makedirs(MODEL_DIR, exist_ok=True)
-
-#Funcion principal para crear la arquitectura del modelo mejorada
 def crear_modelo_cnn_mejorado():
     """
     Implementa una arquitectura CNN mediante transfer learning con ResNet50.
@@ -28,7 +24,7 @@ def crear_modelo_cnn_mejorado():
     modelo_base = ResNet50(
         weights='imagenet',    # Inicialización con pesos preentrenados en ImageNet
         include_top=False,     # Excluir capas fully-connected superiores
-        input_shape=(IMG_SIZE, IMG_SIZE, 3)  # Dimensiones de entrada: HxWxC
+        input_shape=(IMG_SIZE, IMG_SIZE, 3)
     )
     
     # Congelar pesos del backbone para evitar catástrofe de olvido
@@ -80,21 +76,44 @@ def crear_modelo_cnn_mejorado():
     
     return modelo
 
-# Crear la arquitectura del modelo mejorado
-modelo = crear_modelo_cnn_mejorado()
+if __name__ == "__main__":
+    # Asegurar que el directorio existe
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    
+    # Crear la arquitectura del modelo mejorado
+    modelo = crear_modelo_cnn_mejorado()
 
-# Visualizar resumen de la arquitectura
-print("\nArquitectura del modelo CNN mejorado:")
-modelo.summary()
+    # Visualizar resumen de la arquitectura
+    print("\nArquitectura del modelo CNN mejorado:")
+    modelo.summary()
+    
+    # Guardar el diagrama del modelo para referencia
+    tf.keras.utils.plot_model(
+        modelo, 
+        to_file=os.path.join(MODEL_DIR, 'model_architecture.png'),
+        show_shapes=True, 
+        show_dtype=True, 
+        show_layer_names=True
+    )
 
-# Guardar arquitectura inicial
-modelo_path = os.path.join(MODEL_DIR, 'modelo_mejorado.keras')
-modelo.save(modelo_path)
-
-print(f"\nArquitectura mejorada guardada en: {modelo_path}")
-print("\nPrincipales mejoras implementadas:")
-print("1. Descongelamiento parcial de la red base para fine-tuning")
-print("2. Adición de batch normalization para estabilizar el entrenamiento")
-print("3. Aumento del dropout para reducir overfitting")
-print("4. Estructura más profunda con capa intermedia adicional")
-print("5. Learning rate optimizado para convergencia más rápida")
+    # Guardar arquitectura inicial en formato moderno .keras
+    modelo.save(MODEL_PATH)
+    print(f"\nArquitectura mejorada guardada en: {MODEL_PATH}")
+    
+    # Guardar también la estructura como JSON para referencia
+    model_config = {
+        "num_layers": len(modelo.layers),
+        "params": modelo.count_params(),
+        "trainable_params": sum(tf.keras.backend.count_params(p) for p in modelo.trainable_weights),
+        "non_trainable_params": sum(tf.keras.backend.count_params(p) for p in modelo.non_trainable_weights),
+    }
+    
+    with open(os.path.join(MODEL_DIR, 'model_config.json'), 'w') as f:
+        json.dump(model_config, f, indent=4)
+    
+    print("\nPrincipales características del modelo:")
+    print("1. Transfer learning con ResNet50 preentrenado")
+    print("2. Fine-tuning de las últimas capas para adaptación al problema específico")
+    print("3. Batch normalization para estabilizar el entrenamiento")
+    print(f"4. Alto dropout ({DROPOUT_RATE}) para reducir overfitting")
+    print("5. Estructura multi-capa con regularización")
