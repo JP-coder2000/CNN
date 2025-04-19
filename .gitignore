@@ -1,5 +1,17 @@
-/test
-/train
-/venv
-/models
+# Carpetas de datos y modelos
+logs/
+train/
+test/
+venv/
+models/
+muestras_aumentadas/
+validation/
+
+# Archivos específicos
 modelo_inicial.keras
+*.h5
+logs/**/*.tfevents.*
+
+# Archivos de TensorFlow
+**/events.out.tfevents.*
+**/*.tfevents.*
