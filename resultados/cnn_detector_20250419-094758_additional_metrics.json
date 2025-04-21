@@ -1,0 +1,7 @@
+{
+    "true_negatives": 5248,
+    "false_positives": 752,
+    "false_negatives": 1972,
+    "true_positives": 4028,
+    "specificity": 0.8746666666666667
+}

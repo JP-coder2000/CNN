@@ -6,9 +6,13 @@ venv/
 models/
 muestras_aumentadas/
 validation/
+resultados/backups
 
 # Archivos específicos
 modelo_inicial.keras
+cnn_detector_20250419-094758_best_loss.keras
+cnn_detector_20250419-094758_best.keras
+cnn_detector_20250419-094758_final.keras
 *.h5
 logs/**/*.tfevents.*
 

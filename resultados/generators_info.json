@@ -1,0 +1,14 @@
+{
+    "class_indices": {
+        "fake": 0,
+        "real": 1
+    },
+    "train_samples": 38400,
+    "train_steps_per_epoch": 1200,
+    "validation_samples": 9600,
+    "validation_steps": 300,
+    "test_samples": 12000,
+    "test_steps": 375,
+    "img_size": 224,
+    "batch_size": 32
+}

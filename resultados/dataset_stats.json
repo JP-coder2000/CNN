@@ -1,0 +1,44 @@
+{
+    "train": {
+        "counts": {
+            "real": 24000,
+            "fake": 24000
+        },
+        "dimensions": {
+            "real": {
+                "avg_width": 1080.0,
+                "avg_height": 1523.2
+            },
+            "fake": {
+                "avg_width": 998.4,
+                "avg_height": 1049.6
+            }
+        },
+        "total_images": 48000,
+        "classes": [
+            "real",
+            "fake"
+        ]
+    },
+    "test": {
+        "counts": {
+            "real": 6000,
+            "fake": 6000
+        },
+        "dimensions": {
+            "real": {
+                "avg_width": 2180.4,
+                "avg_height": 3016.8
+            },
+            "fake": {
+                "avg_width": 985.6,
+                "avg_height": 896.0
+            }
+        },
+        "total_images": 12000,
+        "classes": [
+            "real",
+            "fake"
+        ]
+    }
+}

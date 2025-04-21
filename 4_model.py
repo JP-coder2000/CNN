@@ -3,6 +3,7 @@ from tensorflow.keras.applications import ResNet50 #type: ignore
 from tensorflow.keras import layers, models, optimizers #type: ignore
 import os
 import json
+import numpy as np
 
 # Importar configuración
 from config import (
@@ -24,7 +25,7 @@ def crear_modelo_cnn_mejorado():
     modelo_base = ResNet50(
         weights='imagenet',    # Inicialización con pesos preentrenados en ImageNet
         include_top=False,     # Excluir capas fully-connected superiores
-        input_shape=(IMG_SIZE, IMG_SIZE, 3)
+        input_shape=(IMG_SIZE, IMG_SIZE, 3)  # Dimensiones de entrada: HxWxC
     )
     
     # Congelar pesos del backbone para evitar catástrofe de olvido
@@ -87,25 +88,32 @@ if __name__ == "__main__":
     print("\nArquitectura del modelo CNN mejorado:")
     modelo.summary()
     
-    # Guardar el diagrama del modelo para referencia
-    tf.keras.utils.plot_model(
-        modelo, 
-        to_file=os.path.join(MODEL_DIR, 'model_architecture.png'),
-        show_shapes=True, 
-        show_dtype=True, 
-        show_layer_names=True
-    )
-
+    # Intentar guardar el diagrama del modelo para referencia
+    try:
+        tf.keras.utils.plot_model(
+            modelo, 
+            to_file=os.path.join(MODEL_DIR, 'model_architecture.png'),
+            show_shapes=True, 
+            show_dtype=True, 
+            show_layer_names=True
+        )
+        print(f"Diagrama del modelo guardado en: {os.path.join(MODEL_DIR, 'model_architecture.png')}")
+    except ImportError:
+        print("No se pudo generar el diagrama del modelo. Se requiere instalar graphviz correctamente.")
+    
     # Guardar arquitectura inicial en formato moderno .keras
     modelo.save(MODEL_PATH)
     print(f"\nArquitectura mejorada guardada en: {MODEL_PATH}")
     
     # Guardar también la estructura como JSON para referencia
+    trainable_params = int(sum(tf.keras.backend.count_params(p) for p in modelo.trainable_weights))
+    non_trainable_params = int(sum(tf.keras.backend.count_params(p) for p in modelo.non_trainable_weights))
+    
     model_config = {
         "num_layers": len(modelo.layers),
-        "params": modelo.count_params(),
-        "trainable_params": sum(tf.keras.backend.count_params(p) for p in modelo.trainable_weights),
-        "non_trainable_params": sum(tf.keras.backend.count_params(p) for p in modelo.non_trainable_weights),
+        "params": int(modelo.count_params()),
+        "trainable_params": trainable_params,
+        "non_trainable_params": non_trainable_params,
     }
     
     with open(os.path.join(MODEL_DIR, 'model_config.json'), 'w') as f:
