@@ -1,129 +1,68 @@
 # Detector de Imágenes Fake vs Real con CNN
 
-Este proyecto implementa un clasificador binario de imágenes utilizando Redes Neuronales Convolucionales (CNN) para distinguir entre imágenes reales y falsas (generadas por IA). El modelo utiliza técnicas de transfer learning a través de la arquitectura ResNet50 preentrenada para maximizar el rendimiento con menor tiempo de entrenamiento.
+Este proyecto implementa un clasificador binario basado en Redes Neuronales Convolucionales (CNN) que distingue entre imágenes reales y falsas (generadas por IA). Utilizando transfer learning con ResNet50, el modelo alcanza un accuracy de 77.3% y un AUC-ROC de 0.863.
+
+## Características Principales
+
+- **Arquitectura**: ResNet50 con fine-tuning selectivo (últimas 15 capas)
+- **Preprocesamiento**: Data augmentation (rotación, desplazamiento, flip) y normalización
+- **Regularización**: Dropout (0.6), Batch Normalization, Early Stopping
+- **Optimización**: Adam con learning rate adaptativo (3e-4 inicial con reducción progresiva)
 
 ## Estructura del Proyecto
 
-El proyecto está organizado en scripts modulares que conforman un pipeline completo de machine learning:
-
-1. **1_check_gpu.py**: Verifica la disponibilidad de GPU () y configuración de TensorFlow.
-2. **2_check_data.py**: Explora el conjunto de datos y muestra estadísticas.
-3. **3_data_processing.py**: Preprocesa las imágenes y configura los data generators.
-4. **4_model.py**: Define la arquitectura del modelo CNN con transfer learning.
-5. **5_training.py**: Entrena el modelo y evalúa su rendimiento.
-6. **check_corrupted_images.py**: Script de utilidad para identificar y eliminar imágenes corruptas.
+```
+├── 1_check_gpu.py            # Verifica disponibilidad de GPU
+├── 2_check_data.py           # Explora y analiza el dataset
+├── 3_data_processing.py      # Preprocesa imágenes y configura generadores
+├── 4_model.py                # Define la arquitectura CNN
+├── 5_training.py             # Entrena y evalúa el modelo
+├── check_corrupted_images.py # Identifica imágenes corruptas
+├── config.py                 # Configuración global del proyecto
+├── models/                   # Modelos guardados
+└── resultados/               # Métricas, gráficos y análisis
+```
 
 ## Requisitos
 
-- Python 3.8+ (de preferencia y por experiencia principal, recomiendo la versión 3.11.8)
+- Python 3.8+ (recomendado 3.11.8)
 - TensorFlow 2.x
-- Pillow (PIL)
-- NumPy
-- Matplotlib
+- NumPy, Matplotlib, Pillow
+- scikit-learn (para métricas de evaluación)
 
-## Preparación del Entorno
-
-1. Se recomienda usar un entorno virtual:
+## Instalación Rápida
 
 ```bash
 python -m venv venv
-source venv/bin/activate 
+source venv/bin/activate
+pip install tensorflow numpy matplotlib pillow scikit-learn
 ```
 
-2. Instalar dependencias:
+## Uso
 
-```bash
-pip install tensorflow numpy matplotlib pillow
-```
+1. Ejecutar los scripts en orden numérico (1 → 5)
+2. Para entrenar con GPU:
+   ```bash
+   python 5_training.py
+   ```
+3. Revisar resultados en el directorio `resultados/`
 
-## Solución de Problemas con Imágenes Corruptas
+## Rendimiento
 
-Si encuentras errores como "image file is truncated", primero ejecuta el script para identificar imágenes corruptas:
+| Métrica      | Valor  |
+|--------------|--------|
+| Accuracy     | 77.3%  |
+| AUC-ROC      | 0.863  |
+| Precision    | 0.843  |
+| Recall       | 0.671  |
+| F1-Score     | 0.747  |
+| Especificidad| 0.875  |
 
-```bash
-python check_corrupted_images.py
-```
+## Solución de Problemas
 
-Este script:
-- Verificará todas las imágenes en los directorios de entrenamiento y prueba
-- Identificará imágenes corruptas
-- Te dará la opción de eliminarlas automáticamente
+- Para errores con imágenes corruptas: `python check_corrupted_images.py`
+- Para errores de memoria: reducir `BATCH_SIZE` o `IMG_SIZE` en `config.py`
 
-## Ejecución del Pipeline
+## Basado en
 
-Se recomienda ejecutar los scripts en el siguiente orden:
-
-1. **Verificar recursos computacionales**:
-```bash
-python 1_check_gpu.py
-```
-
-2. **Analizar el conjunto de datos**:
-```bash
-python 2_check_data.py
-```
-
-3. **Preparar los datos para entrenamiento**:
-```bash
-python 3_data_processing.py
-```
-
-4. **Crear la arquitectura del modelo**:
-```bash
-python 4_model.py
-```
-
-5. **Entrenar y evaluar el modelo**:
-```bash
-python 5_training.py
-```
-
-## Parámetros del Modelo
-
-- **Arquitectura**: ResNet50 preentrenada en ImageNet (transfer learning)
-- **Input**: Imágenes RGB de 224x224 píxeles
-- **Optimizador**: Adam con learning rate adaptativo
-- **Función de pérdida**: Binary Cross-Entropy
-- **Métricas**: Accuracy, AUC-ROC, Precision, Recall, F1-Score
-- **Regularización**: Dropout (0.5), Early Stopping, Reducción de learning rate
-
-## Técnicas de Data Augmentation
-
-Para mejorar la robustez del modelo, se aplican las siguientes transformaciones:
-- Rotación aleatoria (±15°)
-- Desplazamiento horizontal y vertical (10%)
-- Volteo horizontal
-- Normalización de píxeles al rango [0,1]
-
-## Resultados y Visualización
-
-Los resultados del entrenamiento se guardan en el directorio `resultados`:
-- Modelo con mejores pesos (`cnn_detector_*_best.keras`)
-- Modelo final (`cnn_detector_*_final.h5`)
-- Curvas de aprendizaje (accuracy y loss)
-- Historial de entrenamiento (formato JSON)
-
-## Solución de Problemas Comunes
-
-### Error: "image file is truncated"
-Este error ocurre cuando hay imágenes corruptas en el conjunto de datos. Se puede solucionar:
-1. Ejecutando `check_corrupted_images.py` para limpiar el dataset, o
-2. Agregando las siguientes líneas al principio de tus scripts:
-```python
-from PIL import Image, ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-Image.MAX_IMAGE_PIXELS = None
-```
-
-### Errores de Memoria
-Si experimentas errores de memoria, prueba:
-- Reducir el tamaño del batch (`BATCH_SIZE`)
-- Disminuir la resolución de las imágenes (`IMG_SIZE`)
-- Usar `workers=1` y `use_multiprocessing=False` en `model.fit()`
-
-## Notas Adicionales
-
-- La validación cruzada se realiza mediante un split interno (80% train, 20% validation)
-- El conjunto de test se mantiene separado para una evaluación imparcial
-- Se implementan callbacks para evitar overfitting y guardar el mejor modelo
-- Los logs de entrenamiento están disponibles en TensorBoard para visualización detallada
+Este proyecto toma como referencia el trabajo de Kroiß y Reschke "Deepfake Detection of Face Images based on a Convolutional Neural Network", adaptando su enfoque de transfer learning con ResNet50 para clasificación binaria de imágenes.
