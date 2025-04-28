@@ -28,7 +28,6 @@ def crear_modelo_cnn_mejorado():
         input_shape=(IMG_SIZE, IMG_SIZE, 3)  # Dimensiones de entrada: HxWxC
     )
     
-    # Congelar pesos del backbone para evitar catástrofe de olvido
     # Solo dejamos entrenar las últimas 15 capas para fine-tuning
     for layer in modelo_base.layers[:-15]:
         layer.trainable = False

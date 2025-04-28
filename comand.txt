@@ -1,1 +1,1 @@
-python predict.py --imagen 1536C39E-64EA-4721-8C16-DE923046A258_1_105_c.jpeg --modelo resultados/cnn_detector_20250419-094758_best.keras
+python predict.py --imagen loqui.jpeg --modelo resultados/cnn_detector_20250419-094758_best.keras
